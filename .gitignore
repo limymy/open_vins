@@ -8,3 +8,7 @@ doxgen_generated
 *.swo
 doc
 .vscode
+
+ov_msckf/results/*.txt
+ov_msckf/results/*.tum
+!ov_msckf/results/euroc_v1_01_easy.tum
