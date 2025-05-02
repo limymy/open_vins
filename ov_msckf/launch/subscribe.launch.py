@@ -16,6 +16,9 @@ launch_args = [
         name="rviz_enable", default_value="false", description="enable rviz node"
     ),
     DeclareLaunchArgument(
+        name="do_save", default_value="true", description="enable recorder node"
+    ),
+    DeclareLaunchArgument(
         name="config",
         default_value="euroc_mav",
         description="euroc_mav, tum_vi, rpng_aruco...",
@@ -44,7 +47,12 @@ launch_args = [
         name="save_total_state",
         default_value="false",
         description="record the total state with calibration and features to a txt file",
-    )
+    ),
+    DeclareLaunchArgument(
+        name="path_est",
+        default_value="/tmp/traj_estimate.txt",
+        description="path to save the estimated trajectory",
+    ),
 ]
 
 def launch_setup(context):
@@ -104,7 +112,21 @@ def launch_setup(context):
             ],
     )
 
-    return [node1, node2]
+    recorder_node = Node(
+        package='ov_eval',
+        executable='pose_to_file',          # ROS2 用 executable 而不是 type
+        name='recorder_estimate',
+        condition=IfCondition(LaunchConfiguration('do_save')),
+        output='screen',
+        # 原来 <param> 都写在 parameters 里，支持 LaunchConfiguration 动态替换
+        parameters=[{
+            'topic': '/ov_msckf/poseimu',
+            'topic_type': 'PoseWithCovarianceStamped',
+            'output': LaunchConfiguration('path_est')
+        }]
+    )
+
+    return [node1, node2, recorder_node]
 
 
 def generate_launch_description():
