@@ -48,7 +48,22 @@ bool State_JPLQuatLocal::Plus(const double *x, const double *delta, double *x_pl
   return true;
 }
 
-bool State_JPLQuatLocal::ComputeJacobian(const double *x, double *jacobian) const {
+bool State_JPLQuatLocal::PlusJacobian(const double *x, double *jacobian) const {
+  Eigen::Map<Eigen::Matrix<double, 4, 3, Eigen::RowMajor>> j(jacobian);
+  j.topRows<3>().setIdentity();
+  j.bottomRows<1>().setZero();
+  return true;
+}
+
+bool State_JPLQuatLocal::Minus(const double *x, const double *delta, double *x_plus_delta) const {
+  Eigen::Map<const Eigen::Vector3d> d_th(delta);
+  Eigen::Vector3d del = -d_th;
+
+  Plus(x, del.data(), x_plus_delta);
+  return true;
+}
+
+bool State_JPLQuatLocal::MinusJacobian(const double *x, double *jacobian) const {
   Eigen::Map<Eigen::Matrix<double, 4, 3, Eigen::RowMajor>> j(jacobian);
   j.topRows<3>().setIdentity();
   j.bottomRows<1>().setZero();

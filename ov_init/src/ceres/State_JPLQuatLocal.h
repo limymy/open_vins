@@ -23,13 +23,14 @@
 #define OV_INIT_CERES_JPLQUATLOCAL_H
 
 #include <ceres/ceres.h>
+// #include <ceres/manifold.h>
 
 namespace ov_init {
 
 /**
  * @brief JPL quaternion CERES state parameterization
  */
-class State_JPLQuatLocal : public ceres::LocalParameterization {
+class State_JPLQuatLocal : public ceres::Manifold {
 public:
   /**
    * @brief State update function for a JPL quaternion representation.
@@ -54,11 +55,15 @@ public:
    * dr/dlocal= [ dr/dlocal, 0] * [I; 0]= dr/dlocal.
    * Therefore we here define dglobal/dlocal= [I; 0]
    */
-  bool ComputeJacobian(const double *x, double *jacobian) const override;
+  bool PlusJacobian(const double *x, double *jacobian) const override;
 
-  int GlobalSize() const override { return 4; };
+  int AmbientSize() const override { return 4; };
 
-  int LocalSize() const override { return 3; };
+  int TangentSize() const override { return 3; };
+ 
+  // TODO:占位用，未真实实现
+  bool Minus(const double *x, const double *delta, double *x_plus_delta) const override;
+  bool MinusJacobian(const double *x, double *jacobian) const override;
 };
 
 } // namespace ov_init
